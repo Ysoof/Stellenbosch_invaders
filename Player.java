@@ -6,7 +6,7 @@ public class Player
     int is_alive;
     int rotate;
     int player;
-    String png;
+    String picture;
     
     public Player(double x, double y, int player)
     {
@@ -16,11 +16,28 @@ public class Player
         is_alive = 1;
         rotate = 0;
         this.player = player;
-        png = "Player_im.png"
+        picture = "Banana.png";
     }
     
-    public Draw()
+    public void Draw()
     {
-        StdDraw.picture(x, y, png);
+        StdDraw.picture(x, y, picture);
+    }
+    
+    public void Move_left()
+    {
+        if(x > 148)
+            x -= 2;
+    }
+    
+    public void Move_right()
+    {
+        if(x < 852)
+            x += 2;
+    }
+    
+    public void Shot()
+    {
+        
     }
 }
