@@ -2,6 +2,7 @@ public class Ennemy
 {
     double x;
     double y;
+    int lives;
     String picture;
     GameTimer can_fire;
     
@@ -9,6 +10,7 @@ public class Ennemy
     {
         this.x = x;
         this.y = y;
+        this.lives = 1;
         picture = "Banana.png";
         can_fire = new GameTimer(rate);
     }
@@ -30,7 +32,7 @@ public class Ennemy
     //Move the Ennemy down
     public void Move_down()
     {
-        y -= 10;
+        y -= 50;
     }
     
     //Draw the Ennemy

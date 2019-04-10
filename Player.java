@@ -25,7 +25,7 @@ public class Player
     //Draw the Player
     public void Draw()
     {
-        StdDraw.picture(x, y, picture);
+        StdDraw.picture(x, y, picture, rotate);
     }
     
     //Move the Player on the left

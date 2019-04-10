@@ -19,19 +19,52 @@ public class Game
         int[] is_finished = {0};
         Missile last_missile = null;
         Missile last_ennemy_missile = null;
+        int score = 0;
         
         while(is_finished[0] == 0)
         {
+            if(StdDraw.isKeyPressed(27))
+            {
+                while(true)
+                {
+                    StdDraw.clear();
+                    StdDraw.textLeft(960, 790, "Press C to Continue");
+                    StdDraw.textLeft(960, 590, "Press E to Exit");
+                    StdDraw.show();
+                    if(StdDraw.isKeyPressed(69))
+                    {
+                        System.exit(0);
+                    }
+                    if(StdDraw.isKeyPressed(67))
+                    {
+                        break;
+                    }
+                }
+            }
             player.Draw();
             Draw_Ennemies(ennemy_arr);
             move = Ennemy.UpdateEnnemies(ennemy_arr, move);
-            if(StdDraw.isKeyPressed(38))
+            if(StdDraw.isKeyPressed(32))
             {
                 if(last_missile == null || last_missile.fire_rate.getTime() == 0)
                 {
-                    Missile missile = new Missile(player.x, player.y, "Banana.png", 500);
+                    Missile missile = new Missile(player.x, player.y, "Banana.png", 500, player.rotate);
                     last_missile = AddMissile(missile, missile_arr);
                 }
+            }
+            if(StdDraw.isKeyPressed(38))
+            {
+                if(player.rotate == 360)
+                    player.rotate = 0;
+                if(player.rotate < 46 || player.rotate >= 314)
+                    player.rotate += 2;
+            }
+            if(StdDraw.isKeyPressed(40))
+            {
+                if(player.rotate == 0)
+                    player.rotate = 360;
+                if(player.rotate > 314 || player.rotate <= 46)
+                    player.rotate -= 2;
             }
             if(StdDraw.isKeyPressed(37))
             {
@@ -48,10 +81,10 @@ public class Game
                                                    && ennemy_arr[proba / 10][proba % 10].can_fire.getTime() == 0))
             {
                 Ennemy shooter = ennemy_arr[proba / 10][proba % 10];
-                Missile missile = new Missile(shooter.x, shooter.y, "Laser.png", 200);
+                Missile missile = new Missile(shooter.x, shooter.y, "Laser.png", 200, 0);
                 last_ennemy_missile = AddMissile(missile, ennemy_missile_arr);
             }
-            UpdateMissiles(missile_arr, ennemy_arr);
+            score = UpdateMissiles(missile_arr, ennemy_arr, score);
             Draw_missiles(missile_arr);
             player = UpdateEnnemiesMissiles(player, ennemy_arr, missile_arr, move, ennemy_missile_arr, is_finished);
             Draw_missiles(ennemy_missile_arr);
@@ -59,7 +92,26 @@ public class Game
             {
                 StdDraw.clear();
                 StdDraw.picture(960, 590, "Game_over.png");
-                break;
+                while(true)
+                {
+                    StdDraw.textLeft(960, 590, "Press R to try again");
+                    StdDraw.show();
+                    if(StdDraw.isKeyPressed(82))
+                    {
+                        player = new Player(960, 100, 1, 3);
+                        missile_arr = new Missile[20];
+                        ennemy_missile_arr = new Missile[20];
+                        ennemy_arr = Ennemy.Initialize_arr();
+                        move = new int[2];
+                        move[0] = 1;
+                        move[1] = 0;
+                        is_finished[0] = 0;
+                        last_missile = null;
+                        last_ennemy_missile = null;
+                        score = 0;
+                        break;
+                    }
+                }
             }
             if (CheckWin(ennemy_arr) == 1)
             {
@@ -67,12 +119,42 @@ public class Game
                 StdDraw.picture(960, 590, "Win.png");
                 break;
             }
+            if(CheckGround(ennemy_arr) == 1)
+            {
+                StdDraw.clear();
+                StdDraw.picture(960, 590, "Game_over.png");
+                while(true)
+                {
+                    StdDraw.textLeft(960, 490, "Press E to Exit");
+                    StdDraw.textLeft(960, 590, "Press R to try again");
+                    StdDraw.show();
+                    if(StdDraw.isKeyPressed(82))
+                    {
+                        player = new Player(960, 100, 1, 3);
+                        missile_arr = new Missile[20];
+                        ennemy_missile_arr = new Missile[20];
+                        ennemy_arr = Ennemy.Initialize_arr();
+                        move = new int[2];
+                        move[0] = 1;
+                        move[1] = 0;
+                        is_finished[0] = 0;
+                        last_missile = null;
+                        last_ennemy_missile = null;
+                        score = 0;
+                        break;
+                    }
+                    if(StdDraw.isKeyPressed(67))
+                        System.exit(0);
+                }
+            }
+            StdDraw.textLeft(50, 50, Integer.toString(score));
             StdDraw.show();
             StdDraw.clear();
         }
         StdDraw.show();
     }
     
+    //Check if all the ennemies are dead
     public static int CheckWin(Ennemy[][] ennemy_arr)
     {
         for(int i = 0; i < 4; i++)
@@ -87,6 +169,23 @@ public class Game
         }
         
         return 1;
+    }
+    
+    //Check if the ennemies reached the ground
+    public static int CheckGround(Ennemy[][] ennemy_arr)
+    {
+        for(int j = 0; j < 4; j++)
+        {
+            for(int k = 0; k < 10; k++)
+            {
+                if(ennemy_arr[j][k] != null)
+                {
+                    if (ennemy_arr[j][k].y <= 50)
+                        return 1;
+                }
+            }
+        }
+        return 0;
     }
     
     public static Player ResetGame(Player player, Ennemy[][] ennemy_arr, Missile[] missile_arr, int[] move, 
@@ -128,8 +227,8 @@ public class Game
     
     //Update the position of all the missiles of the list
     //Delete a missile if he is out of the screen
-    //Delete the missile and the ennemy if the ennemy get shot
-    public static void UpdateMissiles(Missile[] missile_arr, Ennemy[][] ennemy_arr)
+    //Delete the missile and the ennemy if the ennemy get shot and updatethe score
+    public static int UpdateMissiles(Missile[] missile_arr, Ennemy[][] ennemy_arr, int score)
     {
         for(int i = 0; i < 20; i++)
         {
@@ -151,12 +250,14 @@ public class Game
                             {
                                 ennemy_arr[j][k] = null;
                                 missile_arr[i] = null;
+                                score += 10;
                             }
                         }
                     }
                 }
             }
         }
+        return score;
     }
     
     //
