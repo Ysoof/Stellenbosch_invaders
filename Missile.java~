@@ -25,7 +25,6 @@ public class Missile
         x += 15 * Math.sin(Math.toRadians(360 - rotate));
     }
     
-    //Move the missile down
     public void MoveDown()
     {
         y -= 5;

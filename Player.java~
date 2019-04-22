@@ -19,7 +19,7 @@ public class Player
         this.lives = lives;
         rotate = 0;
         this.player = player;
-        picture = "Spaceship.png";
+        picture = "Monkey.png";
     }
     
     //Draw the Player
